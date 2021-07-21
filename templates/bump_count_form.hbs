@@ -15,15 +15,15 @@
     <hr class="solid">
 
     <form action="/bump-count" method="get"
-        data-controller="hello"
+        data-controller="form"
         data-form-remote-success-url="/thanks"
-        data-action="submit->hello#submit"
+        data-action="submit->form#submit"
     >
     <!-- Elements to query are declared with `data-target` -->
         <div> Number of friends you have:
-            <p style="display: inline" data-hello-target="output" data-optimistic-update-type="increment">{{count}}</p>!
+            <p style="display: inline" data-form-target="output" data-optimistic-update-type="increment">{{count}}</p>!
         </div>
-    <button data-hello-target="submit" type="submit">Get more</button>
-    <p data-hello-target="error" class="hide" style="color: red;">There was an error! Please try again.</p>
+    <button data-form-target="submit" type="submit">Get more</button>
+    <p data-form-target="error" class="hide" style="color: red;">There was an error! Please try again.</p>
     </form>
 </turbo-frame>
