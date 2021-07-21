@@ -1,7 +1,16 @@
 import { Controller } from "stimulus"
 
 export default class extends Controller {
-    greet() {
-        console.log("Hello, Stimulus!", this.element)
-      }
+  static targets = ["submit"];
+
+  submit(event) {
+    event.preventDefault()
+    let form = this.element;
+    const request = new Request('/bump-count');
+    fetch(request)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+      });
+  }
 }

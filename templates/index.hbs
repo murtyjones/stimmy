@@ -3,10 +3,14 @@
         <script src="/public/bundle.js" async></script>
   </head>
   <body>
-    <p> Welcome to the site {{name}}!</p>
-    <div data-controller="hello">
-        <input type="text">
-        <button data-action="click->hello#greet">Greet</button>
-    </div>
+    <form action="/action" method="post"
+        data-controller="hello"
+        data-form-remote-success-url="/thanks"
+        data-action="submit->hello#submit"
+    >
+      <!-- Elements to query are declared with `data-target` -->
+      <p> Number of friends you have: {{count}}!</p>
+      <button type="submit" data-target="hello.submit">Get more</button>
+    </form>
   </body>
 </html>
