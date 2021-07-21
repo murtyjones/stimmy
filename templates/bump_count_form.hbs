@@ -1,0 +1,29 @@
+<turbo-frame id="bump-count">
+
+    <p>
+        The count below is managed by the server (imagine that it lives in a database). Clicking the button:
+        <ul>
+            <li>Optimistically updates the counter by one on the client</li>
+            <li>Disables the "submit" button</li>
+            <li>Makes a request to the server to update the count</li>
+            <li>When the server responds, does nothing in the success case, and in the failure case displays an errors and rolls the count back</li>
+            <li>Re-enables the "submit" button</li>
+        </ul>
+        <strong>The API is programmed to throw an error every 5th (or so) request, so click on the counter a bunch to see the effect.</strong>
+    </p>
+
+    <hr class="solid">
+
+    <form action="/bump-count" method="get"
+        data-controller="hello"
+        data-form-remote-success-url="/thanks"
+        data-action="submit->hello#submit"
+    >
+    <!-- Elements to query are declared with `data-target` -->
+        <div> Number of friends you have:
+            <p style="display: inline" data-hello-target="output" data-optimistic-update-type="increment">{{count}}</p>!
+        </div>
+    <button data-hello-target="submit" type="submit">Get more</button>
+    <p data-hello-target="error" class="hide" style="color: red;">There was an error! Please try again.</p>
+    </form>
+</turbo-frame>

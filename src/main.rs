@@ -2,9 +2,11 @@
 
 #[macro_use] extern crate rocket;
 
-use std::collections::HashMap;
+use std::time::Duration;
+use std::{collections::HashMap, thread::sleep};
 use std::sync::Mutex;
 
+use rand::Rng;
 use rocket::State;
 use rocket_contrib::{json::Json, serve::StaticFiles, templates::Template};
 use serde::Serialize;
@@ -25,16 +27,25 @@ fn index(hit_count: State<HitCount>) -> Template {
 }
 
 #[derive(Serialize)]
-struct HitCountRes {
-    count: usize
+struct Response {
+    success: bool
 }
 
 #[get("/bump-count")]
-fn bump_count(hit_count: State<HitCount>) -> Json<HitCountRes> {
-    *hit_count.count.lock().unwrap().get_mut() += 1;
-    let count = hit_count.count.lock().unwrap().load(Ordering::Relaxed);
-    Json(HitCountRes {
-        count
+fn bump_count(hit_count: State<HitCount>) -> Json<Response> {
+    // We add a delay to mimick the normal delay from the server
+    sleep(Duration::from_millis(250));
+    let mut rng = rand::thread_rng();
+    // Should succeed 80% of the time
+    let should_succeed = rng.gen_range(0..5) != 4;
+    if should_succeed {
+        *hit_count.count.lock().unwrap().get_mut() += 1;
+        return Json(Response {
+            success: true
+        });
+    }
+    Json(Response {
+        success: false
     })
     
 }
@@ -42,6 +53,7 @@ fn bump_count(hit_count: State<HitCount>) -> Json<HitCountRes> {
 fn main() {
     rocket::ignite()
         .mount("/public", StaticFiles::from("out"))
+        .mount("/css", StaticFiles::from("css"))
         .mount("/", routes![index, bump_count])
         .manage(HitCount { count: Mutex::new(AtomicUsize::new(6)) })
         .attach(Template::fairing())

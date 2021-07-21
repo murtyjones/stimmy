@@ -10,3 +10,4 @@ edition = "2018"
 rocket = "0.4.10"
 serde = { version = "1.0.126", features = ["derive"] }
 rocket_contrib = { version = "0.4.10", features = ["handlebars_templates"] }
+rand = "0.8.4"
