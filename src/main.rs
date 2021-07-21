@@ -18,12 +18,19 @@ struct HitCount {
     count: Mutex<AtomicUsize>
 }
 
-#[get("/")]
+#[get("/optimistic-ui")]
 fn index(hit_count: State<HitCount>) -> Template {
     let count = hit_count.count.lock().unwrap().load(Ordering::Relaxed);
     let context: HashMap<&str, usize> = [("count", count)]
         .iter().cloned().collect();
     Template::render("index", &context)
+}
+
+// #[get("/profile/new")]
+#[get("/")]
+fn create_profile_page() -> Template {
+    let context: HashMap<&str, usize> = [].iter().cloned().collect();
+    Template::render("create_profile_page", &context)
 }
 
 #[derive(Serialize)]
@@ -54,7 +61,7 @@ fn main() {
     rocket::ignite()
         .mount("/public", StaticFiles::from("out"))
         .mount("/css", StaticFiles::from("css"))
-        .mount("/", routes![index, bump_count])
+        .mount("/", routes![index, bump_count, create_profile_page])
         .manage(HitCount { count: Mutex::new(AtomicUsize::new(6)) })
         .attach(Template::fairing())
         .launch();
