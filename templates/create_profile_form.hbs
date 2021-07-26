@@ -1,3 +1,55 @@
-<div>
-    Hi
-</div>
+<turbo-frame id="create-profile-form">
+
+    <p>
+        TODO
+        <ul>
+            <li>TODO</li>
+            <li>Disables the "submit" button</li>
+            <li>Makes a request to the server to update the count</li>
+            <li>When the server responds, does nothing in the success case, and in the failure case displays an errors and rolls the count back</li>
+            <li>Re-enables the "submit" button</li>
+        </ul>
+    </p>
+
+    <hr class="solid">
+
+    <form 
+        method="post"
+        action="/profiles/new"
+        data-controller="form"
+        data-form-remote-success-url="/profiles"
+        data-action="submit->form#submit"
+        data-turbo="false"
+    >
+        <div class="form-section">
+            <label for="username">Username:</label>
+            <input
+                type="text"
+                id="username"
+                name="username"
+                data-form-target="textfield"
+                data-action="blur->form#checkapi"
+                data-validation-api-route="/username-availability"
+                data-validation-result-element-id="lolol"
+                data-validation-success-text="Username is available!"
+                data-validation-failure-text="Sorry, that username is taken!"
+            >
+            <p id="lolol" data-form-target="error" class="hide" />
+        </div>
+
+        <div data-controller="imagepreview" class="form-section">
+            <img data-imagepreview-target="output" width="100" height="100" />
+            <label for="profile_pic_b64">Choose a profile picture:</label>
+            <input
+                type="file"
+                id="profile_pic_b64"
+                name="profile_pic_b64"
+                accept="image/png, image/jpeg"
+                data-imagepreview-target="input"
+                data-action="imagepreview#readURL"
+            />
+        </div>
+
+        <button data-form-target="submit" type="submit">Create your profile</button>
+    </form>
+</turbo-frame>

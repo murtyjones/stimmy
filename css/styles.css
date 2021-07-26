@@ -10,4 +10,16 @@
 hr.solid {
     border-top: 1px solid #bbb;
     margin: 40px 0;
-  }
+}
+
+.form-section {
+    margin: 20px 0;
+}
+
+.success {
+    color: green;
+}
+
+.failure {
+    color: brown;
+}

@@ -1,0 +1,30 @@
+<html>
+    {{> head }}
+  <body>
+    {{> menu }}
+    <div id="main">
+      <h1>Edit User Profile</h1>
+      <turbo-frame id="user">
+        <form>
+            <div class="form-section">
+                <label for="username">Username:</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    {{!-- data-form-target="textfield"
+                    data-action="blur->form#checkapi"
+                    data-validation-api-route="/username-availability"
+                    data-validation-result-element-id="lolol"
+                    data-validation-success-text="Username is available!"
+                    data-validation-failure-text="Sorry, that username is taken!" --}}
+                >
+            </div>
+        </form>
+        <a href="/profiles/{{user.username}}">View User</a>
+        <br />
+        <a href="/profiles/{{user.username}}">View All Users</a>
+      </turbo-frame>
+    </div>
+  </body>
+</html>

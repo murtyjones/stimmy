@@ -1,0 +1,21 @@
+<html>
+    {{> head }}
+  <body>
+    {{> menu }}
+    <div id="main">
+      {{#if notice}}
+        <p id="notice">{{notice}}</p>
+      {{/if}}
+      {{#each profiles}}
+        <div style="margin: 20px 0">
+          <img src={{this.profile_pic_b64}} width="100" height="100" />
+          <br />
+          {{this.username}}
+        </div>
+        <a href="/profiles/{{this.username}}">View user</a>
+        <br />
+        <a href="/profiles/{{this.username}}/edit">Edit user</a>
+      {{/each}}
+    </div>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+<html>
+    {{> head }}
+  <body>
+    {{> menu }}
+    <div id="main">
+      <h1>User Details</h1>
+      <turbo-frame id="user">
+        <div style="margin: 20px 0">
+            <img src={{user.profile_pic_b64}} width="200" height="200" />
+            <br />
+            {{user.username}}
+            <p>
+              <h5>About me</h5>
+              <turbo-frame id="description" src="/profiles/{{user.username}}/description">
+                This content  will be replaced
+              </turbo-frame>
+            </p>
+        </div>
+        <a href="/profiles/{{user.username}}/edit">Edit User</a>
+        <br />
+        <a href="/profiles" target="_top">View All Users</a>
+      </turbo-frame>
+    </div>
+  </body>
+</html>

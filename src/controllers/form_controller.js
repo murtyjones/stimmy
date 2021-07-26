@@ -1,26 +1,47 @@
 import { Controller } from "stimulus"
 
+const toBase64 = file => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = error => reject(error);
+})
+
+const isFile = (input) => !!input.type && !!input.lastModified
+
 export default class extends Controller {
   static targets = ["submit", "output", "error"];
 
-  submit(event) {
+  async submit(event) {
     event.preventDefault()
     if (this.submitTarget) {
       this.submitTarget.disabled = true;
     }
-    const maybeOptimisticUpdateType = this.outputTarget?.dataset?.optimisticUpdateType;
-    if (maybeOptimisticUpdateType) {
-      this.optimistic(event, maybeOptimisticUpdateType);
+    if (this.hasOutputTarget && this.outputTarget.dataset?.optimisticUpdateType) {
+      this.optimistic(event, this.outputTarget.dataset.optimisticUpdateType);
     }
-    const request = new Request('/bump-count');
+    const form = new FormData(event.target);
+    const values = Object.fromEntries(form.entries());
+    const body = {};
+    for (const key in values) {
+      if (isFile(values[key])) {
+        body[key] = await toBase64(values[key])
+      } else {
+        body[key] = values[key]
+      }
+    }
+    console.log(body)
+    // console.log(values);
+    const request = new Request(this.element.action, {
+      method: this.element.method,
+      body: JSON.stringify(body)
+    })
     fetch(request)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
         if (!data.success && maybeOptimisticUpdateType) {
           this.revert(event, maybeOptimisticUpdateType);
         }
-        console.log(this.errorTarget);
         if (!data.success && this.errorTarget) {
           this.errorTarget.classList.remove('hide');
         } else if (data.success && this.errorTarget) {
@@ -62,5 +83,45 @@ export default class extends Controller {
         throw new Error("Unhandled revert type ", type);
       }
     }
+  }
+
+  checkapi(event) {
+    if (!event.target.value) {
+      return;
+    }
+    const validationApiRoute = event.target?.dataset?.validationApiRoute;
+    if (!validationApiRoute) {
+      throw new Error('Missing API validation route!');
+    }
+    const validationResultElementId = event.target?.dataset?.validationResultElementId;
+    if (!validationResultElementId) {
+      throw new Error('Missing API validation result element ID!');
+    }
+    const validationResultElement = document.getElementById(validationResultElementId);
+    if (!validationResultElement) {
+      throw new Error('Missing API validation result element!');
+    }
+    const validationSuccessText = event.target?.dataset?.validationSuccessText;
+    const validationFailureText = event.target?.dataset?.validationFailureText;
+    if (!validationSuccessText || !validationFailureText) {
+      throw new Error('Missing API validation result content!');
+    }
+    const maybeDivider = validationApiRoute[validationApiRoute.length - 1] === '/' ? '' : '/';
+    const validationApiRouteFull = `${validationApiRoute}${maybeDivider}${event.target.value}`;
+    const request = new Request(validationApiRouteFull);
+    fetch(request)
+      .then(response => response.json())
+      .then(({ isValid }) => {
+        validationResultElement.classList.remove('hide');
+        validationResultElement.classList.remove('failure');
+        validationResultElement.classList.remove('success');
+        if (isValid) {
+          validationResultElement.classList.add('success');
+          validationResultElement.innerHTML = validationSuccessText;
+        } else {
+          validationResultElement.classList.add('failure');
+          validationResultElement.innerHTML = validationFailureText;
+        }
+      });
   }
 }

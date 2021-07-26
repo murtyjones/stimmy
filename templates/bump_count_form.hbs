@@ -14,12 +14,12 @@
 
     <hr class="solid">
 
-    <form action="/bump-count" method="get"
+    <form 
+        method="get"
+        action="/bump-count"
         data-controller="form"
-        data-form-remote-success-url="/thanks"
         data-action="submit->form#submit"
     >
-    <!-- Elements to query are declared with `data-target` -->
         <div> Number of friends you have:
             <p style="display: inline" data-form-target="output" data-optimistic-update-type="increment">{{count}}</p>!
         </div>
