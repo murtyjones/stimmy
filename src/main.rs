@@ -71,11 +71,18 @@ fn show_profile(username: String, profiles: State<Profiles>) -> Template {
 }
 
 #[get("/profiles/<username>/description")]
-fn description(username: String, profiles: State<Profiles>) -> String {
+fn description(username: String, profiles: State<Profiles>) -> Template {
+    // Make this one take extra long so that a load spinner fires for a while
     random_short_sleep();
     random_short_sleep();
     random_short_sleep();
-    "my description!".to_string()
+    random_short_sleep();
+    random_short_sleep();
+    let user: Option<Profile> = profiles.0.lock().unwrap().iter()
+        .find(|e| e.username == username).cloned();
+    let mut context: HashMap<&str, String> = HashMap::new();
+    context.insert("description", user.unwrap().description);
+    Template::render("description", &context)
 }
 
 #[get("/profiles/<username>/edit")]
