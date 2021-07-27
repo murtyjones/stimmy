@@ -1,0 +1,26 @@
+<turbo-stream action="replace" target="userSearchResults">
+  <template>
+    <div id="userSearchResults">
+      {{#each users}}
+        <div>
+            <a href="/profiles/{{this.username}}">{{this.username}}</a>
+        </div>
+      {{/each}}
+    </div>
+  </template>
+  {{!-- <% @users.each do |user| %>
+    <tr>
+      <td><%= user.name %></td>
+      <td><%= link_to 'Show', user %></td>
+      <td><%= link_to 'Edit', edit_user_path(user) %></td>
+      <td><%= link_to 'Destroy', user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    </tr>
+  <% end %>
+
+  <!-- Blank state -->
+  <% if @users.empty? %>
+    <tr>
+      <td><em>No matching users</em></td>
+    </tr>
+  <% end %> --}}
+</turbo-stream>

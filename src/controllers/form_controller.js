@@ -30,12 +30,19 @@ export default class extends Controller {
         body[key] = values[key]
       }
     }
-    console.log(body)
-    // console.log(values);
-    const request = new Request(this.element.action, {
-      method: this.element.method,
-      body: JSON.stringify(body)
-    })
+    const requestOptions = {
+      method: this.element.method
+    };
+    const params = new URLSearchParams(body);
+    let url = this.element.action;
+    if (this.element.method.toLowerCase() === 'get' && params.toString()) {
+      url = `${this.element.action}?${params.toString()}`;
+    } else if (this.element.method.toLowerCase() === 'post') {
+      requestOptions.body = JSON.stringify(body)
+    } else {
+      console.error('unhandled form action method');
+    }
+    const request = new Request(url, requestOptions)
     fetch(request)
       .then(response => response.json())
       .then(data => {

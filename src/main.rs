@@ -5,6 +5,8 @@
 use std::time::Duration;
 use std::{collections::HashMap, thread::sleep};
 use std::sync::Mutex;
+use rocket::http::ContentType;
+use rocket::response::content::Content;
 
 use rand::Rng;
 use rocket::State;
@@ -19,7 +21,7 @@ struct HitCount {
     count: Mutex<AtomicUsize>
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(FromForm, Serialize, Deserialize, Clone)]
 struct Profile {
     username: String,
     description: String,
@@ -120,6 +122,21 @@ fn check_username_availability(username: String, profiles: State<Profiles>) -> J
     })
 }
 
+#[derive(FromForm, Serialize, Deserialize, Clone)]
+struct FindProfile {
+    username: String
+}
+
+#[post("/profiles/find", data = "<form>")]
+fn find_profiles(form: Form<FindProfile>, profiles: State<Profiles>) -> Content<Template> {
+    let profiles = profiles.0.lock().unwrap();
+    let mut context: HashMap<&str, Vec<Profile>> = HashMap::new();
+    context.insert("users", profiles.clone());
+    let stream = ContentType::new("text", "vnd.turbo-stream.html");
+    Content(stream, Template::render("user_search_results", &context))
+}
+
+
 #[get("/bump-count")]
 fn bump_count(hit_count: State<HitCount>) -> Json<Response> {
     random_short_sleep();
@@ -151,7 +168,7 @@ fn main() {
         .mount("/css", StaticFiles::from("css"))
         .mount("/", routes![
             index, bump_count, create_profile_page, list_profiles, create_profile, edit_profile,
-            show_profile, check_username_availability, description
+            show_profile, check_username_availability, description, find_profiles
         ])
         .manage(HitCount { count: Mutex::new(AtomicUsize::new(6)) })
         .manage(

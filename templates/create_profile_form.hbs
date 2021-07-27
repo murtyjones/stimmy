@@ -14,7 +14,7 @@
     <hr class="solid">
 
     <form 
-        method="post"
+        method="POST"
         action="/profiles/new"
         data-controller="form"
         data-form-remote-success-url="/profiles"
@@ -35,6 +35,16 @@
                 data-validation-failure-text="Sorry, that username is taken!"
             >
             <p id="lolol" data-form-target="error" class="hide" />
+        </div>
+
+        <div class="form-section">
+            <label for="description">Description:</label>
+            <input
+                type="text"
+                id="description"
+                name="description"
+                data-form-target="textfield"
+            >
         </div>
 
         <div data-controller="imagepreview" class="form-section">

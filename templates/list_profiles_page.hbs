@@ -6,6 +6,19 @@
       {{#if notice}}
         <p id="notice">{{notice}}</p>
       {{/if}}
+
+      <form
+        method="POST"
+        action="/profiles/find"
+        {{!-- data-controller="form" data-action="submit->form#submit" --}}
+      >
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username"><br>
+        <button data-form-target="submit" type="submit">Search</button>
+      </form>
+
+      <div id="userSearchResults"></div>
+
       {{#each profiles}}
         <div style="margin: 20px 0">
           <img src={{this.profile_pic_b64}} width="100" height="100" />
