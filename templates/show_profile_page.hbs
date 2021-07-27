@@ -9,12 +9,14 @@
             <img src={{user.profile_pic_b64}} width="200" height="200" />
             <br />
             {{user.username}}
-            <p>
+            <div>
               <h5>About me</h5>
-              <turbo-frame id="description" src="/profiles/{{user.username}}/description">
-                This content  will be replaced
-              </turbo-frame>
-            </p>
+              <div style="border: 1px solid gray; min-height: 70px; box-sizing: border-box; padding: 5px 10px;">
+                <turbo-frame id="description" src="/profiles/{{user.username}}/description">
+                  {{> load_spinner }}
+                </turbo-frame>
+              </div>
+            </div>
         </div>
         <a href="/profiles/{{user.username}}/edit">Edit User</a>
         <br />
