@@ -1,0 +1,79 @@
+<html>
+    {{> head }}
+  <body>
+    {{> menu }}
+    <div id="main">
+
+      <div class="filter-section">
+        <div class="filters" data-controller="filters">
+          <label for="brand">Brand:</label>
+          <select name="brand" id="brand">
+              <option value="Nike" data-action="filters#filter" data-filter-target="filter">Big Company</option>
+              <option value="Adidas" data-action="filters#filter" data-filter-target="filter">Adidas</option>
+              <option value="New Balance" data-action="filters#filter" data-filter-target="filter">New Balance</option>
+          </select>
+
+          {{!-- <div>
+            <div class="filter-label">Price Range</div>
+            <%= select_tag :price,
+                  options_for_select(
+                    [ ["Under $100", 100], ["Under $200", 200] ], params[:price]
+                  ),
+                  include_blank: "Any Price",
+                  class: "form-select",
+                  data: { action: "filters#filter", target: "filters.filter" } %>
+          </div> --}}
+
+          {{!-- <div>
+            <div class="filter-label">Colorway</div>
+            <label for="brand">Color:</label>
+            <div class="relative"
+              data-controller="toggle checkbox-list"
+            >
+              <button class="form-select text-left"
+                data-action="toggle#toggle"
+                data-target="checkbox-list.count"
+              >
+                All
+              </button>
+
+              <div class="hidden select-popup" data-target="toggle.content">
+                <div class="flex flex-col">
+                  <div class="select-popup-header">
+                    <div class="select-label">Select colorways...</div>
+
+                    <button class="clear-filters"
+                      data-action="checkbox-list#checkNone filters#filter"
+                    >
+                      Clear filter
+                    </button>
+                  </div>
+
+                  <div class="select-popup-list space-y-2">
+                    <% Shoe.colors.each do |c| %>
+                      <%= label_tag nil, class: "leading-none flex items-center" do %>
+                        <%= check_box_tag 'colors[]', c, params.fetch(:colors, []).include?(c),
+                          class: "form-checkbox text-indigo-500 mr-2",
+                          data: { target: "filters.filter"} %>
+                        <%= c %>
+                      <% end %>
+                    <% end %>
+                  </div>
+
+                  <div class="select-popup-action-footer">
+                    <button class="p-2 w-full select-none"
+                      data-action="filters#filter"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> --}}
+        </div>
+      </div>
+
+    </div>
+  </body>
+</html>
