@@ -6,11 +6,11 @@
 
       <div class="filter-section">
         <div class="filters" data-controller="filters">
-          <label for="brand">Brand:</label>
-          <select name="brand" id="brand">
-              <option value="Nike" data-action="filters#filter" data-filter-target="filter">Big Company</option>
-              <option value="Adidas" data-action="filters#filter" data-filter-target="filter">Adidas</option>
-              <option value="New Balance" data-action="filters#filter" data-filter-target="filter">New Balance</option>
+          <label for="industry">Industry:</label>
+          <select name="industry" id="industry" data-action="change->filters#filter">
+              <option value="tech" data-filters-target="filter">Tech</option>
+              <option value="finance" data-filters-target="filter">Finance</option>
+              <option value="e-commerce" data-filters-target="filter">E-Commerce</option>
           </select>
 
           {{!-- <div>
