@@ -167,7 +167,7 @@ fn bump_count(hit_count: State<HitCount>) -> Json<Response> {
 // A delay of 250-350ms to mimick the normal delay from the server
 fn random_short_sleep() {
     let mut rng = rand::thread_rng();
-    let delay_ms = rng.gen_range(250..=350);
+    let delay_ms = rng.gen_range(400..=600);
     sleep(Duration::from_millis(delay_ms));
 }
 
