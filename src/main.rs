@@ -139,9 +139,30 @@ fn find_profiles(form: Form<FindProfile>, profiles: State<Profiles>) -> Content<
     Content(stream, Template::render("user_search_results", &context))
 }
 
-#[get("/profiles/filter")]
-fn profiles_filter() -> Template {
-    let mut context: HashMap<&str, Vec<Profile>> = HashMap::new();
+#[derive(Serialize, Deserialize)]
+#[serde(untagged)]
+
+enum FilterContext {
+    Industry(String),
+    Profiles(Vec<Profile>),
+}
+
+#[get("/profiles/filter?<industry>")]
+fn profiles_filter(industry: Option<String>, profiles: State<Profiles>) -> Template {
+    random_short_sleep();
+    let profiles = profiles.0.lock().unwrap();
+    let mut context: HashMap<String, FilterContext> = HashMap::new();
+    if let Some(ind) = industry.as_ref() {
+        context.insert(ind.clone(), FilterContext::Industry("true".to_string()));
+    }
+    let matching_profiles: Vec<Profile> = profiles.iter().cloned()
+    .filter(|e| {
+        if let Some(ind) = &industry {
+            return e.industry == *ind;
+        }
+        true
+    }).collect();
+    context.insert("profiles".to_string(), FilterContext::Profiles(matching_profiles));
     Template::render("filter", &context)
 }
 

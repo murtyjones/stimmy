@@ -7,11 +7,19 @@
       <div class="filter-section">
         <div class="filters" data-controller="filters">
           <label for="industry">Industry:</label>
-          <select name="industry" id="industry" data-action="change->filters#filter">
-              <option value="tech" data-filters-target="filter">Tech</option>
-              <option value="finance" data-filters-target="filter">Finance</option>
-              <option value="e-commerce" data-filters-target="filter">E-Commerce</option>
+          <select name="industry" id="industry" data-action="change->filters#filter" data-filters-target="filter">
+              <option value="tech" {{#if tech}}selected{{/if}}>Tech</option>
+              <option value="finance" {{#if finance}}selected{{/if}}>Finance</option>
+              <option value="e-commerce" {{#if e-commerce}}selected{{/if}}>E-Commerce</option>
           </select>
+
+          {{#each profiles}}
+            <div style="margin: 20px 0">
+              <img src={{this.profile_pic_b64}} width="100" height="100" />
+              <br />
+              {{this.username}}
+            </div>
+          {{/each}}
 
           {{!-- <div>
             <div class="filter-label">Price Range</div>
