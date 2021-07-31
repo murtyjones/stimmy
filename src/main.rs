@@ -26,7 +26,7 @@ struct HitCount {
     count: Mutex<AtomicUsize>
 }
 
-#[derive(FromForm, Serialize, Deserialize, Clone)]
+#[derive(FromForm, Serialize, Deserialize, Clone, Debug)]
 struct Profile {
     username: String,
     upshot: String,
@@ -43,6 +43,21 @@ struct Profiles(Mutex<Vec<Profile>>);
 struct Response {
     success: bool
 }
+
+const SUN_SIGNS: [&'static str; 12] = [
+    "Capricorn",
+    "Aquarius",
+    "Pisces",
+    "Aries",
+    "Taurus",
+    "Gemini",
+    "Cancer",
+    "Leo",
+    "Virgo",
+    "Libra",
+    "Scorpio",
+    "Sagittarius"
+];
 
 #[get("/optimistic-ui")]
 fn index(hit_count: &State<HitCount>) -> Template {
@@ -154,7 +169,8 @@ enum FilterContext {
 
 #[derive(FromForm, Debug)]
 struct Filters {
-    industry: Vec<String>
+    industry: Vec<String>,
+    sun_sign: Vec<String>,
 }
 
 #[get("/profiles/filter?<filters..>")]
@@ -163,14 +179,19 @@ fn profiles_filter(filters: Filters, profiles: &State<Profiles>) -> Template {
     let profiles = profiles.0.lock().unwrap();
     let matching_profiles: Vec<Profile> = profiles.iter().cloned()
     .filter(|e| {
-        if filters.industry.contains(&e.industry) {
-            return true;
+        if filters.industry.len() > 0 && !filters.industry.contains(&e.industry) {
+            return false;
         }
-        filters.industry.len() == 0
+        if filters.sun_sign.len() > 0 && !filters.sun_sign.contains(&e.sun_sign) {
+            return false;
+        }
+        true
     }).collect();
     Template::render("filter", context! {
         profiles: matching_profiles,
-        industry: filters.industry
+        checked_industries: filters.industry,
+        checked_sun_signs: filters.sun_sign,
+        all_sun_signs: SUN_SIGNS,
     })
 }
 
@@ -321,7 +342,7 @@ fn contains<'reg, 'rc>(
     if array.is_none() {
         return Err(RenderError::new("No array given"));
     }
-    let array = h.param(0).unwrap().value().as_array();
+    let array = array.unwrap().value().as_array();
     if array.is_none() {
         return Err(RenderError::new("First param should be an array"));
     }

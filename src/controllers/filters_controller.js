@@ -13,6 +13,9 @@ export default class extends Controller {
     get params () {
         const searchParams = new URLSearchParams();
         this.filterTargets.forEach(t => {
+            if (t.type === 'checkbox' && !t.checked) {
+                return;
+            }
             searchParams.append(t.name, t.value);
         });
         return searchParams.toString();

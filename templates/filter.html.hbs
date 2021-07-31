@@ -9,13 +9,13 @@
           <div>
             <label for="industry">Industry:</label>
             <select name="industry" id="industry" data-action="change->filters#filter" data-filters-target="filter">
-                <option value="tech" {{#contains industry "tech"}}selected{{/contains}}>
+                <option value="tech" {{#contains checked_industries "tech"}}selected{{/contains}}>
                   Tech
                 </option>
-                <option value="finance" {{#contains industry "finance"}}selected{{/contains}}>
+                <option value="finance" {{#contains checked_industries "finance"}}selected{{/contains}}>
                   Finance
                 </option>
-                <option value="e-commerce" {{#contains industry "e-commerce"}}selected{{/contains}}>
+                <option value="e-commerce" {{#contains checked_industries "e-commerce"}}selected{{/contains}}>
                   E-Commerce
                 </option>
             </select>
@@ -48,7 +48,7 @@
                 </div>
 
                 <div class="select-popup-list space-y-2">
-                  {{#each sun_signs}}
+                  {{#each all_sun_signs}}
                     <label class="leading-none flex items-center">
                       {{this}}
                       <input
@@ -58,6 +58,7 @@
                         name="sun_sign"
                         value="{{this}}"
                         data-filters-target="filter"
+                        {{#contains ../checked_sun_signs this}}checked{{/contains}}
                       >
                     </label>
                   {{/each}}
