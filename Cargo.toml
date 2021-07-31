@@ -7,7 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocket = "0.4.10"
+rocket = { version = "0.5.0-rc.1", features = ["json"] }
 serde = { version = "1.0.126", features = ["derive"] }
-rocket_contrib = { version = "0.4.10", features = ["handlebars_templates"] }
+rocket_contrib = { version = "0.4.10", features = [] }
 rand = "0.8.4"
+
+[dependencies.rocket_dyn_templates]
+version = "0.1.0-rc.1"
+features = ["handlebars"]
