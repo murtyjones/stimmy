@@ -1,21 +1,26 @@
-#![feature(proc_macro_hygiene, decl_macro)]
+#![feature(proc_macro_hygiene, decl_macro, let_chains)]
 
 #[macro_use] extern crate rocket;
+
 
 use std::time::Duration;
 use std::{collections::HashMap, thread::sleep};
 use std::sync::Mutex;
+use rocket::figment::value::Value;
+use rocket::form::Form;
 use rocket::http::ContentType;
-use rocket::response::content::Content;
-
+use rocket::response::content;
+use rocket::fs::{FileServer, relative};
+use rocket::serde::{Deserialize, Serialize, json::Json};
 use rand::Rng;
 use rocket::State;
-use rocket::request::Form;
-use rocket_contrib::{json::Json, serve::StaticFiles, templates::Template};
-use serde::{Serialize, Deserialize};
-
-
+use rocket::tokio::runtime::Handle;
+use rocket_dyn_templates::handlebars::{JsonValue, Renderable};
+use rocket_dyn_templates::Template;
+use rocket_dyn_templates::handlebars::handlebars_helper;
 use std::sync::atomic::{AtomicUsize, Ordering};
+
+#[macro_use] mod context;
 
 struct HitCount {
     count: Mutex<AtomicUsize>
@@ -40,7 +45,7 @@ struct Response {
 }
 
 #[get("/optimistic-ui")]
-fn index(hit_count: State<HitCount>) -> Template {
+fn index(hit_count: &State<HitCount>) -> Template {
     random_short_sleep();
     let count = hit_count.count.lock().unwrap().load(Ordering::Relaxed);
     let context: HashMap<&str, usize> = [("count", count)]
@@ -52,31 +57,30 @@ fn index(hit_count: State<HitCount>) -> Template {
 #[get("/")]
 fn create_profile_page() -> Template {
     random_short_sleep();
-    let context: HashMap<&str, usize> = [].iter().cloned().collect();
-    Template::render("create_profile_page", &context)
+    Template::render("create_profile_page", context! {})
 }
 
 #[get("/profiles")]
-fn list_profiles(profiles: State<Profiles>) -> Template {
+fn list_profiles(profiles: &State<Profiles>) -> Template {
     random_short_sleep();
     let profiles: Vec<Profile> = profiles.0.lock().unwrap().iter().cloned().collect();
-    let context: HashMap<&str, Vec<Profile>> = [("profiles", profiles)]
-        .iter().cloned().collect();
-    Template::render("list_profiles_page", &context)
+    Template::render("list_profiles_page", context! {
+        profiles
+    })
 }
 
 #[get("/profiles/<username>")]
-fn show_profile(username: String, profiles: State<Profiles>) -> Template {
+fn show_profile(username: String, profiles: &State<Profiles>) -> Template {
     random_short_sleep();
     let user: Option<Profile> = profiles.0.lock().unwrap().iter()
         .find(|e| e.username == username).cloned();
-    let mut context: HashMap<&str, Profile> = HashMap::new();
-    context.insert("user", user.unwrap());
-    Template::render("show_profile_page", &context)
+    Template::render("show_profile_page", context! {
+        user
+    })
 }
 
 #[get("/profiles/<username>/description")]
-fn description(username: String, profiles: State<Profiles>) -> Template {
+fn description(username: String, profiles: &State<Profiles>) -> Template {
     // Make this one take extra long so that a load spinner fires for a while
     random_short_sleep();
     random_short_sleep();
@@ -85,23 +89,23 @@ fn description(username: String, profiles: State<Profiles>) -> Template {
     random_short_sleep();
     let user: Option<Profile> = profiles.0.lock().unwrap().iter()
         .find(|e| e.username == username).cloned();
-    let mut context: HashMap<&str, String> = HashMap::new();
-    context.insert("description", user.unwrap().description);
-    Template::render("description", &context)
+    Template::render("description", context! {
+        description: user.unwrap().description
+    })
 }
 
 #[get("/profiles/<username>/edit")]
-fn edit_profile(username: String, profiles: State<Profiles>) -> Template {
+fn edit_profile(username: String, profiles: &State<Profiles>) -> Template {
     random_short_sleep();
     let user: Option<Profile> = profiles.0.lock().unwrap().iter()
         .find(|e| e.username == username).cloned();
-    let mut context: HashMap<&str, Profile> = HashMap::new();
-    context.insert("user", user.unwrap());
-    Template::render("edit_profile_page", &context)
+    Template::render("edit_profile_page", context! {
+        user: user.unwrap()
+    })
 }
 
 #[post("/profiles/new", data = "<user_form>")]
-fn create_profile(user_form: Json<Profile>, profiles: State<Profiles>) -> Json<Response> {
+fn create_profile(user_form: Json<Profile>, profiles: &State<Profiles>) -> Json<Response> {
     random_short_sleep();
     let mut profiles = profiles.0.lock().unwrap();
     profiles.push(user_form.0);
@@ -117,7 +121,7 @@ struct FieldValidationResponse {
 }
 
 #[get("/username-availability/<username>")]
-fn check_username_availability(username: String, profiles: State<Profiles>) -> Json<FieldValidationResponse> {
+fn check_username_availability(username: String, profiles: &State<Profiles>) -> Json<FieldValidationResponse> {
     random_short_sleep();
     let is_available = profiles.0.lock().unwrap().iter().find(|each| each.username == username).is_none();
     Json(FieldValidationResponse {
@@ -127,16 +131,16 @@ fn check_username_availability(username: String, profiles: State<Profiles>) -> J
 
 #[derive(FromForm, Serialize, Deserialize, Clone)]
 struct FindProfile {
-    username: String
+    username: Vec<String>
 }
 
 #[post("/profiles/find", data = "<form>")]
-fn find_profiles(form: Form<FindProfile>, profiles: State<Profiles>) -> Content<Template> {
+fn find_profiles(form: Form<FindProfile>, profiles: &State<Profiles>) -> content::Custom<Template> {
     let profiles = profiles.0.lock().unwrap();
-    let mut context: HashMap<&str, Vec<Profile>> = HashMap::new();
-    context.insert("users", profiles.clone());
     let stream = ContentType::new("text", "vnd.turbo-stream.html");
-    Content(stream, Template::render("user_search_results", &context))
+    content::Custom(stream, Template::render("user_search_results", context! {
+        users: profiles.clone()
+    }))
 }
 
 #[derive(Serialize, Deserialize)]
@@ -145,30 +149,34 @@ fn find_profiles(form: Form<FindProfile>, profiles: State<Profiles>) -> Content<
 enum FilterContext {
     Industry(String),
     Profiles(Vec<Profile>),
+    SunSigns(Vec<String>),
 }
 
-#[get("/profiles/filter?<industry>")]
-fn profiles_filter(industry: Option<String>, profiles: State<Profiles>) -> Template {
+#[derive(FromForm, Debug)]
+struct Filters {
+    industry: Vec<String>
+}
+
+#[get("/profiles/filter?<filters..>")]
+fn profiles_filter(filters: Filters, profiles: &State<Profiles>) -> Template {
     random_short_sleep();
     let profiles = profiles.0.lock().unwrap();
-    let mut context: HashMap<String, FilterContext> = HashMap::new();
-    if let Some(ind) = industry.as_ref() {
-        context.insert(ind.clone(), FilterContext::Industry("true".to_string()));
-    }
     let matching_profiles: Vec<Profile> = profiles.iter().cloned()
     .filter(|e| {
-        if let Some(ind) = &industry {
-            return e.industry == *ind;
+        if filters.industry.contains(&e.industry) {
+            return true;
         }
-        true
+        filters.industry.len() == 0
     }).collect();
-    context.insert("profiles".to_string(), FilterContext::Profiles(matching_profiles));
-    Template::render("filter", &context)
+    Template::render("filter", context! {
+        profiles: matching_profiles,
+        industry: filters.industry
+    })
 }
 
 
 #[get("/bump-count")]
-fn bump_count(hit_count: State<HitCount>) -> Json<Response> {
+fn bump_count(hit_count: &State<HitCount>) -> Json<Response> {
     random_short_sleep();
     let mut rng = rand::thread_rng();
     // Should succeed 80% of the time
@@ -192,10 +200,11 @@ fn random_short_sleep() {
     sleep(Duration::from_millis(delay_ms));
 }
 
-fn main() {
-    rocket::ignite()
-        .mount("/public", StaticFiles::from("out"))
-        .mount("/css", StaticFiles::from("css"))
+#[launch]
+fn rocket() -> _ {
+    rocket::build()
+        .mount("/public", FileServer::from(relative!("out")))
+        .mount("/css", FileServer::from(relative!("css")))
         .mount("/", routes![
             index, bump_count, create_profile_page, list_profiles, create_profile, edit_profile,
             show_profile, check_username_availability, description, find_profiles, profiles_filter
