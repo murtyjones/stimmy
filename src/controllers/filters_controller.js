@@ -11,6 +11,10 @@ export default class extends Controller {
     }
 
     get params () {
-        return this.filterTargets.map((t) => `${t.name}=${t.value}`).join('&');
+        const searchParams = new URLSearchParams();
+        this.filterTargets.forEach(t => {
+            searchParams.append(t.name, t.value);
+        });
+        return searchParams.toString();
     }
 }
