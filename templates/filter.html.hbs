@@ -1,0 +1,92 @@
+<html>
+    {{> head }}
+  <body>
+    {{> menu }}
+    <div id="main">
+
+      <div class="filter-section">
+        <div class="filters" data-controller="filters">
+          <div>
+            <label for="industry">Industry:</label>
+            <select name="industry" id="industry" data-action="change->filters#filter" data-filters-target="filter">
+                <option value="tech" {{#contains industry "tech"}}selected{{/contains}}>
+                  Tech
+                </option>
+                <option value="finance" {{#contains industry "finance"}}selected{{/contains}}>
+                  Finance
+                </option>
+                <option value="e-commerce" {{#contains industry "e-commerce"}}selected{{/contains}}>
+                  E-Commerce
+                </option>
+            </select>
+          </div>
+
+        <div>
+          <div class="filter-label">Sun Sign</div>
+          <div
+            class="relative"
+            data-controller="toggle checkbox-list"
+            data-toggle-class="hide"
+          >
+            <button class="form-select text-left"
+              data-action="toggle#toggle"
+              data-checkbox-list-target="count"
+            >
+              All
+            </button>
+
+            <div class="hide select-popup" data-toggle-target="content">
+              <div class="flex flex-col">
+                <div class="select-popup-header">
+                  <div class="select-label">Select colorways...</div>
+
+                  <button class="clear-filters"
+                    data-action="checkbox-list#checkNone filters#filter"
+                  >
+                    Clear filter
+                  </button>
+                </div>
+
+                <div class="select-popup-list space-y-2">
+                  {{#each sun_signs}}
+                    <label class="leading-none flex items-center">
+                      {{this}}
+                      <input
+                        class="form-checkbox tet-indigo-500 mr-2"
+                        type="checkbox"
+                        id="sun_sign"
+                        name="sun_sign"
+                        value="{{this}}"
+                        data-filters-target="filter"
+                      >
+                    </label>
+                  {{/each}}
+                </div>
+
+                <div class="select-popup-action-footer">
+                  <button class="p-2 w-full select-none"
+                    data-action="filters#filter"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
+
+      {{#each profiles}}
+        <div style="margin: 20px 0">
+          <img src={{this.profile_pic_b64}} width="100" height="100" />
+          <br />
+          {{this.username}}
+        </div>
+      {{/each}}
+
+    </div>
+  </body>
+</html>
