@@ -6,7 +6,6 @@
 use std::time::Duration;
 use std::{collections::HashMap, thread::sleep};
 use std::sync::Mutex;
-use rocket::figment::value::Value;
 use rocket::form::Form;
 use rocket::http::ContentType;
 use rocket::response::content;
@@ -14,9 +13,7 @@ use rocket::fs::{FileServer, relative};
 use rocket::serde::{Deserialize, Serialize, json::Json};
 use rand::Rng;
 use rocket::State;
-use rocket::tokio::runtime::Handle;
 use rocket_dyn_templates::Template;
-use rocket_dyn_templates::handlebars::handlebars_helper;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 #[macro_use] mod context;
