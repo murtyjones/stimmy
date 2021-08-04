@@ -1,0 +1,11 @@
+<html>
+    {{> head }}
+  <body>
+    {{> menu }}
+    <div id="main">
+      <div data-controller="cropper">
+        <img data-cropper-target="crop" id="image" src="{{src}}" style="display: block; max-width: 100%">
+      </div>
+    </div>
+  </body>
+</html>

@@ -9,7 +9,7 @@ use std::sync::Mutex;
 use rocket::form::Form;
 use rocket::http::ContentType;
 use rocket::response::content;
-use rocket::fs::{FileServer, relative};
+use rocket::fs::{FileServer, TempFile, relative};
 use rocket::serde::{Deserialize, Serialize, json::Json};
 use rand::Rng;
 use rocket::State;
@@ -218,6 +218,13 @@ fn random_short_sleep() {
     sleep(Duration::from_millis(delay_ms));
 }
 
+#[get("/crop")]
+fn crop_scratchpad() -> Template {
+    Template::render("crop_page", context! {
+        src: include_str!("../images/ceos/tim_b64").to_string()
+    })
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
@@ -225,7 +232,8 @@ fn rocket() -> _ {
         .mount("/css", FileServer::from(relative!("css")))
         .mount("/", routes![
             index, bump_count, create_profile_page, list_profiles, create_profile, edit_profile,
-            show_profile, check_username_availability, description, find_profiles, profiles_filter
+            show_profile, check_username_availability, description, find_profiles, profiles_filter,
+            crop_scratchpad
         ])
         .manage(HitCount { count: Mutex::new(AtomicUsize::new(6)) })
         .manage(
