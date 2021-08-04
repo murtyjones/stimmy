@@ -11,7 +11,8 @@
 
 # Questions
 
-– Is it possible to build a progressive web application?
+- Is it possible to build a progressive web application?
 - How best do you document the usage of a controller in an HTML file? A [Storybook](https://storybook.js.org/) equivalent is needed, which could probably be home-grown
 - How hard is it to achieve/maintain a level of latency in production (100-300ms) that makes Stimulus apps feel like SPAs?
 - For one-off rich experiences too complex for Stimulus to make sense, how would one integrate something like React (or another SPA)?
+- How frequently does the "rich experience" exception crop up in your typical web app? 
